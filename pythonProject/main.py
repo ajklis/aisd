@@ -1,14 +1,13 @@
 import math
+import PySimpleGUI as sg
 
 def distance(p1, p2):
     return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
 def find_collisions(circles):
-    # Check the boundary condition
     if len(circles) < 2:
         return []
 
-    # Sort circles based on x-coordinate
     circles.sort()
 
     intersecting_pairs = []
@@ -18,7 +17,6 @@ def find_collisions(circles):
 
 def closest_pair_in_strip(circles, start, end, intersecting_pairs):
     if end - start <= 3:
-        # If the strip is small, use brute-force
         for i in range(start, end):
             for j in range(i + 1, end):
                 if circles_intersect(circles[i], circles[j]):
@@ -38,11 +36,37 @@ def closest_pair_in_strip(circles, start, end, intersecting_pairs):
                     intersecting_pairs.append((middle_strip[i], middle_strip[j]))
 
 def circles_intersect(circle1, circle2):
-    # Check if two circles intersect
-    radius_sum = 1  # Assuming the radius of all circles is 1
+    radius_sum = 1
     return distance(circle1, circle2) < 2 * radius_sum
 
-# Example usage
-circles = [(0, 0), (1, 1), (2, 1), (3, 3), (4, 4)]
-result = find_collisions(circles)
-print("Intersecting pairs of circles:", result)
+def main():
+    layout = [
+        [sg.Text("Wprowadź współrzędne punktów (x, y):")],
+        [sg.Multiline(size=(40, 6), key="COORDINATES")],
+        [sg.Button("Znajdź przecinające się pary"), sg.Button("Zamknij")],
+        [sg.Text("Wyniki:", size=(40, 1))],
+        [sg.Output(size=(40, 6))]
+    ]
+
+    window = sg.Window("Znajdowanie przecinających się kółek", layout)
+
+    while True:
+        event, values = window.read()
+
+        if event == sg.WINDOW_CLOSED or event == "Zamknij":
+            break
+        elif event == "Znajdź przecinające się pary":
+            coordinates_str = values["COORDINATES"]
+            points = [tuple(map(float, w.split(","))) for w in coordinates_str.split("\n") if w]
+
+            if points:
+                results = find_collisions(points)
+                print("Przecinające się pary kółek:")
+                for pair in results:
+                    print(pair)
+                print("\n---\n")
+
+    window.close()
+
+if __name__ == "__main__":
+    main()
